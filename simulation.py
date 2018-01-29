@@ -3,7 +3,7 @@ from __future__ import division
 import numpy as np
 
 # Definitions of bandit algorithms
-from hoo.hoo import *
+from hoo.lghoo import *
 
 
 # numerical libraries
@@ -41,7 +41,7 @@ def test_algorithm(arm_range, horizon):
     """
     """
 
-    algo = HOO(arm_range, height_limit=10, rho=0.5, minimum_grow=20)
+    algo = LGHOO(arm_range, height_limit=10, rho=0.5, minimum_grow=20)
     # initial vectors representing the variables that will be returned
     chosen_arms = [0.0 for i in range(horizon)]
     rewards = [0.0 for i in range( horizon)]

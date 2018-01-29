@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import networkx as nx
 
 
-class HOO():
+class LGHOO():
     def __init__(self, arm_range, height_limit=10, v1=1.0, rho=0, minimum_grow = 10):
         """
         Initializing a list of arms
@@ -651,78 +651,5 @@ class HOO():
         ax.set_xlabel('Values in the $\chi$-space')
         plt.show()
 
-
-
     def save_list_arms_to_file(self):
         np.savetxt("data.csv", self.get_full_arm_list(), delimiter=",")
-
-
-# if __name__ == "__main__":
-#     a = HOO([1.0, 0.0], height_limit=7)
-#
-#     a.print_full_list()
-#
-#     for i in range(100000):
-#         chosen_arm = a.select_arm()
-#         #print "selected arm", chosen_arm
-#         if chosen_arm < 0.2:
-#             reward = np.random.choice(2,1, p=[0.8, 0.2])[0]
-#         elif chosen_arm < 0.25:
-#             reward = np.random.choice(2, 1, p=[0.2, 0.8])[0]
-#         else:
-#             reward = np.random.choice(2, 1, p=[0.9, 0.1])[0]
-#
-#         #print "reward", reward
-#         a.update(chosen_arm, reward)
-#
-#     a.sort_list_arm_by_arm()
-#     # a.arm_list
-#     a.print_full_list()
-#     print a.get_max_bound_arm()
-#     #a.plot_graph()
-#     #a.save_list_arms_to_file()
-#
-#
-#     # a.add_child_for_arm(0.5)
-#     # #print a.get_full_arm_list()
-#     # # #print a.get_full_arm_list()
-#     # a.add_child_for_arm(0.25)
-#     # # #print a.get_full_arm_list()
-#     # a.add_child_for_arm(0.125)
-#     # # #print a.get_full_arm_list()
-#     # a.add_child_for_arm(0.375)
-#     # a.add_child_for_arm(0.375)
-#     # print a.get_full_arm_list()
-#
-#     # print a.get_count_for_arm(0.5), a.get_mean_for_arm(0.5), a.get_bound_for_arm(0.5)
-#     # a.update_count_for_arm(0.5)
-#     # a.update_n_count_for_arm(0.5,5)
-#     # print a.get_count_for_arm(0.5)
-#     # print a.get_full_arm_list()
-#     # a.update(chosen_arm=0.5,reward=1.0)
-#     # print a.get_full_arm_list()
-#     # a.update(chosen_arm=0.5, reward=1.0)
-#     # print a.get_full_arm_list()
-#     # a.update(chosen_arm=0.5, reward=0.0)
-#     # print a.get_full_arm_list()
-#     # a.update(chosen_arm=0.25, reward=0.0)
-#     # print a.get_full_arm_list()
-#     # print "Comparing the means"
-#     # a.refresh_all_means()
-#     # print a.get_full_arm_list()
-#     # print a.get_total_counts()
-#
-#
-#     #print "tree height", a.get_tree_height()
-#     #
-#     # print a.get_all_index_max_bound()
-#     # a.add_child_for_index(1)
-#     # print a.get_full_arm_list()
-#
-#
-#     # print a.get_parent_index_for_child_index(1)
-#     # print a.get_parent_arm_for_child_index(1)
-#     # print a.get_parent_arm_for_child_arm(0.125)
-#     # print a.get_parent_index_for_child_arm(0.75)
-#
-#     #print a.get_path_for_index(0)
