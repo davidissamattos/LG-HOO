@@ -3,10 +3,11 @@ import numpy as np
 import math
 import matplotlib.pyplot as plt
 import networkx as nx
-
+import os.path
+import sys
 
 class LGHOO():
-    def __init__(self, arm_range, height_limit=10, v1=1.0, rho=0, minimum_grow = 10):
+    def __init__(self, arm_range, height_limit=10, v1=1.0, rho=0, minimum_grow=10):
         """
         Initializing a list of arms
         :param arm_range: a vector with the two borders for the whole range. It can be either [5,1] or [1,5] for example
@@ -377,6 +378,27 @@ class LGHOO():
         index = self.get_index_for_arm(arm)
         self.extend_tree_for_index(index)
 
+    def find_nearest_node_by_arm(self,arm):
+        """
+        This function works only in case the player plays an arm that was not previously allocated or thought in the list of possible arms
+        In this case we take the tree closest arm to the played arm. If the difference between the two would be greater than of the childs we discard the vector
+        else we store it in the found position
+        :param arm:
+        :return: the index
+        """
+        min_index = (np.abs(self.arm_list[:,0] - arm)).argmin()
+        diff = np.abs(self.arm_list[min_index,0]-arm)
+
+        arm_height = self.get_height_for_index(min_index)
+        child_height = arm_height + 1
+        child_diff = self.range_size / np.power(2, child_height)
+
+        if diff > child_diff:
+            return -1
+        else:
+            return min_index
+
+
     def calculate_ucb_for_index(self, index):
         """
         Calculate the ucb estimate for an element
@@ -586,17 +608,23 @@ class LGHOO():
         :param reward: received reward
         :return:
         """
-        #After playing and receiving a reward we should update the whole algorithm
-        #this is the slowest part
-        #Update the mean for the played arm and the count of the arm
 
         #Extend tree with the new bounds (inf) for the child
-        self.extend_tree_for_arm(chosen_arm)
-        #update statistics for the node
-        self.update_mean_for_arm(arm=chosen_arm, reward=reward)
-        #Update the computation of all bounds in the tree
-        self.update_all_bounds()
-        return
+        index = self.find_nearest_node_by_arm(chosen_arm)
+        #if the chosen arm is not valid we ignore it
+        if index == -1:
+            #print "no arm selected"
+            return
+        else:
+
+            arm_to_be_updated = self.get_arm_value_for_index(index)
+            #print "arm played: ", chosen_arm, " arm: ", arm_to_be_updated, " selected"
+            self.extend_tree_for_arm(arm_to_be_updated)
+            #update statistics for the node
+            self.update_mean_for_arm(arm=arm_to_be_updated, reward=reward)
+            #Update the computation of all bounds in the tree
+            self.update_all_bounds()
+            return
 
     def print_full_list(self):
         print self.arm_list_names
@@ -622,34 +650,65 @@ class LGHOO():
         nx.draw(G, pos=pos, with_labels=True)
         plt.show()
 
-    def plot_graph_with_function(self,x_axis, y_axis):
+    def plot_graph_with_function(self,x_axis, y_axis,rescale_y=1,save=False,filename ="output.png"):
         fig, ax = plt.subplots()
         G = self.get_graph()
         pos = nx.get_node_attributes(G, 'pos')
 
-        max_h = self.get_max_height()
+        max_h = int(self.get_max_height())
         function_y0 = max_h+ 1
+        max_y = function_y0 + rescale_y + 0.5
         best_arm_x = self.get_best_arm_value()
-        text_x_offset = 0.1*(self.arm_range_max-self.arm_range_min)
+        text_x_offset = 0.01*(self.arm_range_max-self.arm_range_min)
         text_y_offset = -0.5
 
 
         #ploting the function after the max height
-        ax.plot(x_axis, y_axis+function_y0)
+        ax.plot(x_axis, rescale_y*y_axis+function_y0)
         #Drawing the graph
-        nx.draw(G, pos=pos, node_size = 20,ax=ax)
-        #
+        nx.draw(G, pos=pos, node_size=20,ax=ax)
+
+        # Line of the best arm
         plt.axvline(x=best_arm_x, linestyle='--')
+        ax.text(best_arm_x + text_x_offset, function_y0 + text_y_offset, "Best arm:\n" + str(format(best_arm_x, '.4f')))
+
+
+        # Line for the heights
+        for i in range(1,max_h+1):
+            plt.axhline(y=i, linestyle='--', linewidth=0.5)
+            ax.text(0,i,str(i), size='smaller')
+
+        #line for the zero in the underlying function
+        plt.axhline(y=function_y0, linestyle='-',linewidth=0.5, color='black')
+        plt.axhline(y=function_y0+rescale_y, linestyle='-', linewidth=0.5, color='black')
 
         #Setting figure style
+        #axis on but just with the x axis, the y axis is off
         plt.axis('on')
         plt.xlim(self.arm_range_min,self.arm_range_max)
         ax.get_yaxis().set_visible(False)
+        plt.ylim([1,max_y])
 
+        #setting title for the plot and axis
         ax.set_title('Best value optimization using LG-HOO')
-        ax.text(best_arm_x+text_x_offset, function_y0+text_y_offset, format(best_arm_x,'.4f'))
         ax.set_xlabel('Values in the $\chi$-space')
-        plt.show()
+
+        # legends = '\nh='+str(self.height_limit)+"\nmin_grow="+str(self.minimum_grow)+"\n$\\rho$="+str(self.rho)+"\n$\\nu_1$="+str(self.v1)
+        # props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
+        # ax.text(0.05, 0.95, legends, transform=ax.transAxes, size='smaller',
+        #         verticalalignment='top', bbox=props)
+
+        #Setting other text
+        plt.tight_layout()
+        if save == True:
+            mainfile = sys.argv[0]
+            pathname = os.path.join(os.path.dirname(mainfile),"pictures")
+            output = os.path.join(pathname,filename)
+            plt.tight_layout()
+            plt.savefig(output, format='png', dpi=300)
+        else:
+            plt.tight_layout()
+            plt.show()
 
     def save_list_arms_to_file(self):
         np.savetxt("data.csv", self.get_full_arm_list(), delimiter=",")

@@ -14,4 +14,5 @@ The class hoo in the hoo.py contains several auxiliary functions including plot 
 
 The dependencies of this project are:
 * numpy
-* networkx (for making easier graph plots)
+* networkx for making graph plots
+* scipy for some of the underlying functions
