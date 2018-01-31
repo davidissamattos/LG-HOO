@@ -7,6 +7,9 @@ from algo.lghoo import *
 from underlying_functions.functions import *
 from arms.arms import *
 
+import sys
+import pickle
+
 def test_algorithm(arm_range, horizon, func, plot=True, save=False):
     """
     """
@@ -41,7 +44,7 @@ def test_algorithm(arm_range, horizon, func, plot=True, save=False):
         algo.update(arm, reward)
 
     print "debug: arm arm_bound arm_count", algo.debug_arms_and_bounds()
-
+    print "object size is:", sys.getsizeof(pickle.dumps(algo))
     if plot==True:
         x_axis, y_axis = generate_xy(func,[algo.arm_range_min, algo.arm_range_max])
         filename = func.__name__+"-"+str(horizon)+".png"
@@ -53,7 +56,7 @@ def test_algorithm(arm_range, horizon, func, plot=True, save=False):
 
 
 if __name__ == "__main__":
-    test_algorithm([0, 1], 100, step1, plot=True, save=False)
+    test_algorithm([0, 1], 10000, step1, plot=True, save=False)
 
     # horizon = 1000
     # test_algorithm([0, 1], horizon, step1, plot=True, save=True)

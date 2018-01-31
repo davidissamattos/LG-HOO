@@ -6,7 +6,7 @@ import networkx as nx
 import os.path
 import sys
 
-class LGHOO():
+class LGHOO(object):
     def __init__(self, arm_range, height_limit=10, v1=1.0, rho=0, minimum_grow=10):
         """
         Initializing a list of arms
@@ -369,7 +369,7 @@ class LGHOO():
         Extend the tree in the index
 
         """
-        if self.get_count_for_index(index) > self.minimum_grow:
+        if self.get_count_for_index(index) >= self.minimum_grow:
             self.add_child_for_index(index)
         else:
             return
