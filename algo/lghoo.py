@@ -262,6 +262,22 @@ class LGHOO(object):
     def get_max_bound_index(self):
         return self.get_all_index_max_bound()[0][0]
 
+    def get_original_best_arm_index(self):
+        """
+        The original way in the paper
+        :return:
+        """
+        return np.argwhere(self.arm_list[:, 5] == np.amax(self.arm_list[:, 5]))[0][0]
+
+    def get_original_best_arm(self):
+        """
+        The original way in the paper
+        :return:
+        """
+        index = self.get_original_best_arm_index()
+        return self.get_arm_value_for_index(index)
+
+
     def get_best_arm_index(self):
         """
         Based on the criteria vector

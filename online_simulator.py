@@ -1,3 +1,14 @@
+# This is the online simulator for the online ACE framework
+# This framework implements the LGHOO algorithm
+# Need a configuration file to work
+#
+#
+#
+#
+#
+
+
+
 from __future__ import division
 import numpy as np
 
@@ -38,7 +49,8 @@ clearlghooURL = "/clear/lghoo"
 
 
 
-#THIS IS AN ONLINE SIMULATOR FOR x between 0 and 1 only. Needs some rework to plot in another area
+#THIS IS AN ONLINE SIMULATOR FOR x between 0 and 1 only.
+# Needs some rework to plot in another area
 
 class Connection:
     def __init__(self):
