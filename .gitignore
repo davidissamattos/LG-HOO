@@ -1,4 +1,10 @@
 # Created by .ignore support plugin (hsz.mobi)
-*.csv
-*.png
+
+#ignoring the csv output data
+/data
+
+#ignoring pictures outputs
+/pictures
+
+#ignoring the online simulator in the ACE framework
 online_simulator.py

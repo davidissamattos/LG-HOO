@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import networkx as nx
 import os.path
 import sys
+from savitzky_golay import *
 
 class LGHOO(object):
     def __init__(self, arm_range, height_limit=10, v1=1.0, rho=0, minimum_grow=10):
@@ -666,6 +667,9 @@ class LGHOO(object):
         nx.draw(G, pos=pos, with_labels=True)
         plt.show()
 
+
+
+
     def plot_graph_with_function(self,x_axis, y_axis,rescale_y=1,save=False,filename ="output.png"):
         fig, ax = plt.subplots()
         G = self.get_graph()
@@ -679,8 +683,19 @@ class LGHOO(object):
         text_y_offset = -0.5
 
 
+        #plotting the estimated underlying function
+        self.sort_list_arm_by_arm()
+        est_x = self.arm_list[:,0]
+        number_arms = self.arm_list.shape[0]
+        window = convert2odd(number_arms/2)
+        est_y = savitzky_golay((self.arm_list[:,9]),window_size=window,order=max_h)*rescale_y+ function_y0
+        plt.plot(est_x,est_y, label="Estimated function")
+
         #ploting the function after the max height
-        ax.plot(x_axis, rescale_y*y_axis+function_y0)
+        func_y = rescale_y*y_axis+function_y0
+        func_x = x_axis
+        ax.plot(func_x, func_y, label="True function")
+
         #Drawing the graph
         nx.draw(G, pos=pos, node_size=20,ax=ax)
 

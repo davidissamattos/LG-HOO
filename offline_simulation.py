@@ -16,12 +16,17 @@ import pyprind
 
 import time
 
+
+#Threading
+from threading import Thread
+
+
 ## Right now the simulation works only for underlying functions between 0 and 1
 # and with rewards between 0 and 1
 
 
 
-def test_algorithm(arm_range, horizon, underfunc, plot=True, save=False,num_sim=1, height_limit=10, minimum_grow=20):
+def test_algorithm(arm_range, horizon, underfunc, plot=True, save=False, num_sim=1, height_limit=10, minimum_grow=20, best_arm_policy='new'):
     """
     This function runs the LGHOO algorithm
     :param arm_range: range of the algorithm, with the current underlying functions it is only between 0 and 1
@@ -32,6 +37,7 @@ def test_algorithm(arm_range, horizon, underfunc, plot=True, save=False,num_sim=
     :param num_sim: number of times we will run the whole algorithm (for monte carlo)
     :param height_limit:
     :param minimum_grow:
+    :param best_arm_policy: type of policy for selecting the best arm
     :return:
     """
     print "Starting the algorithm"
@@ -44,15 +50,18 @@ def test_algorithm(arm_range, horizon, underfunc, plot=True, save=False,num_sim=
     cumulative_rewards = np.zeros(num_sim)
     euclidian_distance = np.zeros(num_sim)
     time_spent = np.zeros(num_sim)
-
+    object_size = np.zeros(num_sim)
 
     #starting with 1 simulation
     #algo.initialize(len(arms))
+    func = []
 
     for i in range(0,num_sim):
         algo = []
+        #reset the algorithm every round
         algo = LGHOO(arm_range, height_limit=height_limit, rho=0.5, minimum_grow=minimum_grow)
         bar.update()
+
         # Underlying function
         #reevaluating it so we get updates
         func = underfunc().eval
@@ -77,12 +86,12 @@ def test_algorithm(arm_range, horizon, underfunc, plot=True, save=False,num_sim=
         t1 = time.time()
         time_spent[i] = t1-t0
 
-        ## Collection of the metrics Metrics
-        #Get the the best arm - Modification
-        best_arm = algo.get_best_arm_value()
+        best_arm = []
         #Get the best arm - Original selection of the higher node of the tree
-        #best_arm = algo.get_original_best_arm()
-
+        if best_arm_policy == 'original':
+            best_arm = algo.get_original_best_arm()
+        if best_arm_policy == 'new':
+            best_arm = algo.get_best_arm_value()
         #calculate the distance (not perfect specially if there is more than one maximum)
         euclidian_distance[i] = np.absolute(xmax-best_arm)
 
@@ -90,39 +99,65 @@ def test_algorithm(arm_range, horizon, underfunc, plot=True, save=False,num_sim=
         max_exp_value = ymax*max_reward*horizon
         regret[i] = max_exp_value - cumulative_rewards[i]
 
+        #log the object size
+        object_size[i] = sys.getsizeof(algo)
+
     if plot==True:
         # Underlying function
-        func = underfunc().__init__().eval
         x_axis, y_axis = generate_xy(func, [algo.arm_range_min, algo.arm_range_max])
         xmax, ymax = getMaxFunc(x_axis, y_axis)
         filename = func.__name__+"-"+str(horizon)+".png"
         algo.plot_graph_with_function(x_axis,y_axis,rescale_y=3, save=save, filename=filename)
         return
     else:
-        return [cumulative_rewards, euclidian_distance, regret, time_spent]
+        return [cumulative_rewards, euclidian_distance, regret, time_spent, object_size]
 
 
-def MonteCarloSim(n, func, horizon,height_limit, minimum_grow):
+def MonteCarloSim(n, func, horizon, height_limit, minimum_grow, best_arm_policy='new'):
     t = range(1, n + 1)
-    cumulative_rewards, euclidian_distance, regret, time_spent = test_algorithm([0, 1], horizon, func, plot=False, save=False,
-                                                                    num_sim=n)
+    cumulative_rewards, euclidian_distance, regret, time_spent, object_size = test_algorithm([0, 1], horizon=horizon,
+                                                                                underfunc=func,
+                                                                                minimum_grow=minimum_grow,
+                                                                                height_limit=height_limit,
+                                                                                plot=False,
+                                                                                save=False,
+                                                                                num_sim=n, best_arm_policy=best_arm_policy)
     data = pd.DataFrame({'cumulative_rewards': cumulative_rewards,
                          'euclidian_distance': euclidian_distance,
                          'regret': regret,
-                         'time_spent':time_spent})
-
+                         'time_spent':time_spent,
+                         'object_size':object_size})
     #print data
     mainfile = sys.argv[0]
     pathname = os.path.join(os.path.dirname(mainfile), "data")
-    filename = "montecarlo_" + func.__name__ + "-" + "numsim" + str(n) + "mingrow" + str(minimum_grow) + ".csv"
+    filename = "montecarlo_" + func.__name__ + "-" + "numsim" + str(n) + "mingrow" + str(minimum_grow) + "arm_policy-"+str(best_arm_policy)+"horizon-"+str(horizon)+".csv"
     output = os.path.join(pathname, filename)
-    data.to_csv(output)
+    data.to_csv(output, index=False, header=True)
+
+def Case1():
+    MonteCarloSim(n=1000, func=randomPoly, horizon=1000, height_limit=20, minimum_grow=20, best_arm_policy='new')
+
+def Case2():
+    MonteCarloSim(n=1000, func=randomPoly, horizon=1000, height_limit=20, minimum_grow=0, best_arm_policy='new')
+
+def Case3():
+    MonteCarloSim(n=1000, func=randomPoly, horizon=1000, height_limit=20, minimum_grow=0, best_arm_policy='original')
+
 
 if __name__ == "__main__":
-    MonteCarloSim(n=1000, func=randomPoly, horizon=1000, height_limit=20, minimum_grow=0)
+    test_algorithm([0, 1], horizon=10000, underfunc=complex_trig, plot=True, save=False)
 
-
-
+    #Case1()
+    #Case2()
+    #Case3()
+    #If threading
+    # t1 = Thread(target=Case1, args=[])
+    # t2 = Thread(target=Case2, args=[])
+    # t3 = Thread(target=Case3, args=[])
+    #
+    # t1.start()
+    # t2.start()
+    # t3.start()
 
     # For testing the algorithm only once
     # horizon = 1000

@@ -21,7 +21,7 @@ def generate_xy(func, xrange,num=500):
 class step:
     def __init__(self):
         return
-    def eval(x):
+    def eval(self,x):
         p=[]
         if x < 0.2:
             p = 0.2
@@ -34,27 +34,27 @@ class step:
 class complex_trig:
     def __init__(self):
         return
-    def eval(x):
+    def eval(self,x):
         p = 1 / (12 * (np.sin(13 * x) * np.sin(27 * x) + 1))
         return p
 
 class uniform:
     def __init__(self):
         return
-    def eval(x):
+    def eval(self,x):
         return 0.5
 
 class linear:
     def __init__(self):
         return
 
-    def eval(x):
+    def eval(self,x):
         return 0.1 + (x-0.1)*0.5
 
 class triangle:
     def __init__(self):
         return
-    def eval(x):
+    def eval(self,x):
         p=[]
         if x < 0.3:
             p = 0.1 + x
@@ -65,7 +65,7 @@ class triangle:
 class binormal:
     def __init__(self):
         return
-    def eval(x):
+    def eval(self,x):
         norm1 = stats.norm(loc=0.4,scale=0.05)
         norm2 = stats.norm(loc=0.8, scale=0.05)
         p = (norm1.pdf(x)/norm1.pdf(0.4) + norm2.pdf(x)/norm2.pdf(0.8))
@@ -74,7 +74,7 @@ class binormal:
 class normal:
     def __init__(self):
         return
-    def eval(x):
+    def eval(self,x):
         norm = stats.norm(loc=0.8,scale=0.5)
         p = norm.pdf(x)/norm.pdf(0.8)
         return p
