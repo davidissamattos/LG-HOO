@@ -161,7 +161,7 @@ def test_algorithm(arm_range, horizon, func, plot=True, save=False):
         lghoo.plot_graph_with_function(x_axis, y_axis,rescale_y=3, save=save, filename=filename)
         return
     else:
-        print lghoo.get_full_arm_list()
+        print lghoo._get_full_arm_list()
         print lghoo.get_best_arm_value()
         return
 

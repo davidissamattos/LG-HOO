@@ -105,67 +105,89 @@ def test_algorithm(arm_range, horizon, underfunc, plot=True, save=False, num_sim
     if plot==True:
         # Underlying function
         x_axis, y_axis = generate_xy(func, [algo.arm_range_min, algo.arm_range_max])
-        xmax, ymax = getMaxFunc(x_axis, y_axis)
-        filename = func.__name__+"-"+str(horizon)+".png"
+        # xmax, ymax = getMaxFunc(x_axis, y_axis)
+        filename = underfunc.__name__+"-"+str(horizon)+".png"
         algo.plot_graph_with_function(x_axis,y_axis,rescale_y=3, save=save, filename=filename)
         return
     else:
         return [cumulative_rewards, euclidian_distance, regret, time_spent, object_size]
 
-
-def MonteCarloSim(n, func, horizon, height_limit, minimum_grow, best_arm_policy='new'):
-    t = range(1, n + 1)
-    cumulative_rewards, euclidian_distance, regret, time_spent, object_size = test_algorithm([0, 1], horizon=horizon,
-                                                                                underfunc=func,
-                                                                                minimum_grow=minimum_grow,
-                                                                                height_limit=height_limit,
-                                                                                plot=False,
-                                                                                save=False,
-                                                                                num_sim=n, best_arm_policy=best_arm_policy)
-    data = pd.DataFrame({'cumulative_rewards': cumulative_rewards,
-                         'euclidian_distance': euclidian_distance,
-                         'regret': regret,
-                         'time_spent':time_spent,
-                         'object_size':object_size})
-    #print data
-    mainfile = sys.argv[0]
-    pathname = os.path.join(os.path.dirname(mainfile), "data")
-    filename = "montecarlo_" + func.__name__ + "-" + "numsim" + str(n) + "mingrow" + str(minimum_grow) + "arm_policy-"+str(best_arm_policy)+"horizon-"+str(horizon)+".csv"
-    output = os.path.join(pathname, filename)
-    data.to_csv(output, index=False, header=True)
+def MonteCarloSim(n, func, horizon, height_limit, minimum_grow, best_arm_policy='new',plot=False,save=True):
+    if plot == True:
+        test_algorithm([0, 1],
+                       horizon=horizon,
+                       underfunc=func,
+                       minimum_grow=minimum_grow,
+                       height_limit=height_limit,
+                       plot=True,
+                       save=save,
+                       num_sim=n,
+                       best_arm_policy=best_arm_policy)
+    else:
+        #in this case we never save
+        cumulative_rewards, euclidian_distance, regret, time_spent, object_size = test_algorithm([0, 1],
+                                                                                                 horizon=horizon,
+                                                                                                 underfunc=func,
+                                                                                                 minimum_grow=minimum_grow,
+                                                                                                 height_limit=height_limit,
+                                                                                                 plot=False,
+                                                                                                 save=False,
+                                                                                                 num_sim=n,
+                                                                                                 best_arm_policy=best_arm_policy)
+        data = pd.DataFrame({'cumulative_rewards': cumulative_rewards,
+                             'euclidian_distance': euclidian_distance,
+                             'regret': regret,
+                             'time_spent': time_spent,
+                             'object_size': object_size})
+        # print data
+        mainfile = sys.argv[0]
+        pathname = os.path.join(os.path.dirname(mainfile), "data")
+        filename = "montecarlo-" + func.__name__ + "-" + "-numsim-" + str(n) + "mingrow-" + str(
+            minimum_grow) + "-arm_policy-" + str(best_arm_policy) + "-horizon-" + str(horizon) + ".csv"
+        output = os.path.join(pathname, filename)
+        data.to_csv(output, index=False, header=True)
 
 def Case1():
     MonteCarloSim(n=1000, func=randomPoly, horizon=1000, height_limit=20, minimum_grow=20, best_arm_policy='new')
 
 def Case2():
-    MonteCarloSim(n=1000, func=randomPoly, horizon=1000, height_limit=20, minimum_grow=0, best_arm_policy='new')
-
-def Case3():
     MonteCarloSim(n=1000, func=randomPoly, horizon=1000, height_limit=20, minimum_grow=0, best_arm_policy='original')
 
 
 if __name__ == "__main__":
-    test_algorithm([0, 1], horizon=10000, underfunc=complex_trig, plot=True, save=False)
+    #Simulation of one function
+    MonteCarloSim(n=1, func=normal, horizon=1000, height_limit=20, minimum_grow=20, best_arm_policy='new', plot=True, save=False)
 
+    #Comparison cases
     #Case1()
     #Case2()
-    #Case3()
+
     #If threading
     # t1 = Thread(target=Case1, args=[])
     # t2 = Thread(target=Case2, args=[])
-    # t3 = Thread(target=Case3, args=[])
-    #
     # t1.start()
     # t2.start()
-    # t3.start()
+
 
     # For testing the algorithm only once
-    # horizon = 1000
-    # test_algorithm([0, 1], horizon, step().eval, plot=True, save=True)
-    # test_algorithm([0, 1], horizon, normal().eval, plot=True, save=True)
-    # test_algorithm([0, 1], horizon, complex_trig().eval, plot=True, save=True)
-    # test_algorithm([0, 1], horizon, uniform().eval, plot=True, save=True)
-    # test_algorithm([0, 1], horizon, triangle().eval, plot=True, save=True)
-    # test_algorithm([0, 1], horizon, linear().eval, plot=True, save=True)
-    # test_algorithm([0, 1], horizon, binormal().eval, plot=True, save=True)
-    #
+    # horizon = 10000
+    # MonteCarloSim(n=1,  horizon=horizon, func=step, height_limit=10, minimum_grow=20, best_arm_policy='new', plot=True,
+    #               save=True)
+    # MonteCarloSim(n=1, horizon=horizon, func=normal, height_limit=10, minimum_grow=20, best_arm_policy='new',
+    #               plot=True,
+    #               save=True)
+    # MonteCarloSim(n=1,  horizon=horizon, func=complex_trig, height_limit=10, minimum_grow=20, best_arm_policy='new',
+    #               plot=True,
+    #               save=True)
+    # MonteCarloSim(n=1,  horizon=horizon, func=uniform, height_limit=10, minimum_grow=20, best_arm_policy='new',
+    #               plot=True,
+    #               save=True)
+    # MonteCarloSim(n=1, horizon=horizon, func=triangle, height_limit=10, minimum_grow=20, best_arm_policy='new',
+    #               plot=True,
+    #               save=True)
+    # MonteCarloSim(n=1, horizon=horizon, func=linear, height_limit=10, minimum_grow=20, best_arm_policy='new',
+    #               plot=True,
+    #               save=True)
+    # MonteCarloSim(n=1,horizon=horizon, func=binormal, height_limit=10, minimum_grow=20, best_arm_policy='new',
+    #               plot=True,
+    #               save=True)

@@ -47,8 +47,6 @@ ggplot( data= expdata, aes(x=time_spent, fill = group)) +
 #As the data is not normal
 #Testing for the euclidian distance
 wilcox.test(euclidian_distance ~ group, data = expdata, conf.int=TRUE, conf.level=0.95, alternative = "two.sided")
-
 #Testing for the time
 wilcox.test(time_spent ~ group, data = expdata, conf.int=TRUE, conf.level=0.95, alternative = "two.sided")
-
 
